@@ -27,7 +27,7 @@ namespace CSVQueries.Controllers
        [HttpGet("/SearchByKeyword/{columnName},{word}")]
 
         //[DefaultValue(SizeEnum.Small)]
-        public ActionResult<List<string>> SearchByKeyword(TableColumns columnName, string word)
+        public ActionResult<List<string>> SearchByKeyword(string columnName, string word)
         {
             _query = $"SELECT * FROM public.\"Employees\" WHERE Lower(\"{columnName}\") LIKE Lower('%{word}%');";
             return _service.QueryDB(_query);
