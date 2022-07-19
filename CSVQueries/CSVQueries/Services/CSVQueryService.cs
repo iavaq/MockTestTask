@@ -53,6 +53,7 @@ namespace CSVQueries.Services
 
         public List<string> QueryDB(string query)
         {
+            int i = 0;
             postgres.Connection.Open();
             using (NpgsqlCommand cmd = postgres.SQLCommand(query))
             {
@@ -60,13 +61,16 @@ namespace CSVQueries.Services
                 while (reader.Read())
                 {
                     //is there a way to load all matches as batch rather than row by row?
+                    i++;
                     string e = reader.GetValue(0).ToString() + " - " + reader.GetString(1) + " " + reader.GetString(2) + " - " + reader.GetString(3);
                     Result.Add(e);
                 }
             }
             postgres.Connection.Close();
+            string count = $"Count: {i}";
+            Result.Insert(0, count);
+
             return Result;
         }
-
     }
 }

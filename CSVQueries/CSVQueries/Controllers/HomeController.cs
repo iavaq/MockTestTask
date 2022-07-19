@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CSVQueries.Services;
+using CSVQueries.Models;
+using System.ComponentModel;
 
 namespace CSVQueries.Controllers
 {
@@ -9,7 +11,6 @@ namespace CSVQueries.Controllers
     {
         private readonly ICSVQueryService _service;
         private string _query;
-
         public HomeController(ICSVQueryService service)
         {
             _service = service;
@@ -24,8 +25,9 @@ namespace CSVQueries.Controllers
         }
 
        [HttpGet("/SearchByKeyword/{columnName},{word}")]
-       
-        public ActionResult<List<string>> SearchByKeyword(string columnName, string word)
+
+        //[DefaultValue(SizeEnum.Small)]
+        public ActionResult<List<string>> SearchByKeyword(TableColumns columnName, string word)
         {
             _query = $"SELECT * FROM public.\"Employees\" WHERE Lower(\"{columnName}\") LIKE Lower('%{word}%');";
             return _service.QueryDB(_query);
