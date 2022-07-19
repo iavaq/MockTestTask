@@ -1,7 +1,4 @@
-﻿using CSVQueries.Models;
-using Npgsql;
-
-namespace CSVQueries.Services
+﻿namespace CSVQueries.Services
 {
     public interface ICSVQueryService
     {
@@ -12,9 +9,6 @@ namespace CSVQueries.Services
         List<string> RegexQuery(string columnName, string regex);
         List<string> CharLength(string columnName, int minLength);
         List<string> CompareColumns(string columnA, string columnB);
-
-
-
 
     }
 

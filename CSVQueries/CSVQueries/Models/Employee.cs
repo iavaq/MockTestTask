@@ -6,11 +6,9 @@ namespace CSVQueries.Models
     public class Employee
     {
 
-        //[Key]
-        //[DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
-        //[Key]
-        //public int Id { get; set;}
-        
+        [Key]
+        public int? Id { get; set; }
+
         [Name("first_name")]
         public string FirstName { get; set; }
 
@@ -44,7 +42,5 @@ namespace CSVQueries.Models
         [Name("web")]
         public string Web { get; set; }
 
-        [Key]
-        public int? Id { get; set; }
     }
 }
