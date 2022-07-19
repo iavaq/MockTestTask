@@ -59,6 +59,7 @@ namespace CSVQueries.Services
                 using NpgsqlDataReader reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
+                    //is there a way to load all matches as batch rather than row by row?
                     string e = reader.GetValue(0).ToString() + " - " + reader.GetString(1) + " " + reader.GetString(2) + " - " + reader.GetString(3);
                     Result.Add(e);
                 }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using CSVQueries.Models;
 using CSVQueries.Services;
 
 namespace CSVQueries.Controllers
@@ -25,6 +24,7 @@ namespace CSVQueries.Controllers
         }
 
        [HttpGet("/SearchByKeyword/{columnName},{word}")]
+       
         public ActionResult<List<string>> SearchByKeyword(string columnName, string word)
         {
             _query = $"SELECT * FROM public.\"Employees\" WHERE Lower(\"{columnName}\") LIKE Lower('%{word}%');";
