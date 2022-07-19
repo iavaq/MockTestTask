@@ -9,6 +9,9 @@ namespace CSVQueries.Services
     public class CSVQueryService : ICSVQueryService
     {
         private readonly ModelsContext _context;
+       
+        private DBManager postgres = new();
+
         public List<string> Result = new();
 
         public CSVQueryService(ModelsContext context)
@@ -16,21 +19,18 @@ namespace CSVQueries.Services
             _context = context;
         }
 
-        private static void DropTable()
+        private void TruncTable()
         {
-            NpgsqlConnection conn = new(Environment.GetEnvironmentVariable("CSVQueryAPI"));
-            conn.Open();
-            string sql = "TRUNCATE \"Employees\" RESTART IDENTITY;";
-            NpgsqlCommand command = new(sql, conn);
-            command.ExecuteNonQuery();
-            conn.Close();
+            postgres.Connection.Open();
+            postgres.SQLCommand("TRUNCATE \"Employees\" RESTART IDENTITY;").ExecuteNonQuery();
+            postgres.Connection.Close();
         }
-
 
         public void Upload(IFormFile file)
         {
-            DropTable();
-
+            
+            TruncTable();
+          
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
                 HeaderValidated = null,
@@ -44,7 +44,6 @@ namespace CSVQueries.Services
                 var records = csvReader.GetRecords<Employee>();
                 foreach (var row in records)
                 {
-                    
                     _context.Add(row);
                 }
             }
@@ -52,117 +51,21 @@ namespace CSVQueries.Services
         }
 
 
-        public List<string> KeywordQuery(string column, string word)
+        public List<string> QueryDB(string query)
         {
-            NpgsqlConnection con = new(Environment.GetEnvironmentVariable("CSVQueryAPI"));
-            con.Open();
-            string sql = $"SELECT * FROM public.\"Employees\" WHERE Lower(\"{column}\") LIKE Lower('%{word}%');";
-            
-            using (NpgsqlCommand command = new(sql, con))
+            postgres.Connection.Open();
+            using (NpgsqlCommand cmd = postgres.SQLCommand(query))
             {
-
-                using NpgsqlDataReader reader = command.ExecuteReader();
-                while (reader.Read())
-                {
-                    string e = reader.GetValue(0).ToString() + " - " + reader.GetString(1) + " " + reader.GetString(2) + " - " + reader.GetString(3);
-                    Result.Add(e);
-
-                }
-            }
-
-            con.Close();
-            return Result;
-        }
-
-        public List<string> ExactQuery(string column, string word)
-        {
-            NpgsqlConnection con = new(Environment.GetEnvironmentVariable("CSVQueryAPI"));
-            con.Open();
-            string sql = $"SELECT * FROM public.\"Employees\" WHERE Lower(\"{column}\")=Lower('{word}');";
-
-            using (NpgsqlCommand command = new(sql, con))
-            {
-
-                using NpgsqlDataReader reader = command.ExecuteReader();
-                while (reader.Read())
-                {
-                    string e = reader.GetValue(0).ToString() + " - " + reader.GetString(1) + " " + reader.GetString(2) + " - " + reader.GetString(3);
-                    Result.Add(e);
-
-                }
-            }
-
-            con.Close();
-            return Result;
-        }
-
-        public List<string> RegexQuery(string column, string regex)
-        {
-            //regex
-            NpgsqlConnection con = new(Environment.GetEnvironmentVariable("CSVQueryAPI"));
-            con.Open();
-            string sql = $"SELECT * FROM public.\"Employees\" WHERE \"{column}\" ~ '{regex}';";
-
-            using (NpgsqlCommand command = new(sql, con))
-            {
-                using NpgsqlDataReader reader = command.ExecuteReader();
+                using NpgsqlDataReader reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
                     string e = reader.GetValue(0).ToString() + " - " + reader.GetString(1) + " " + reader.GetString(2) + " - " + reader.GetString(3);
                     Result.Add(e);
                 }
             }
-
-            con.Close();
+            postgres.Connection.Close();
             return Result;
         }
-
-        public List<string> CharLength(string column, int num)
-        {
-         
-            NpgsqlConnection con = new(Environment.GetEnvironmentVariable("CSVQueryAPI"));
-            con.Open();
-            string sql = $"SELECT * FROM public.\"Employees\" WHERE length(\"{column}\")>{num};";
-
-            using (NpgsqlCommand command = new(sql, con))
-            {
-
-                using NpgsqlDataReader reader = command.ExecuteReader();
-                while (reader.Read())
-                {
-                    string e = reader.GetValue(0).ToString() + " - " + reader.GetString(1) + " " + reader.GetString(2) + " - " + reader.GetString(3);
-                    Result.Add(e);
-
-                }
-            }
-
-            con.Close();
-            return Result;
-        }
-
-        public List<string> CompareColumns(string colA, string colB)
-        {
-
-            NpgsqlConnection con = new(Environment.GetEnvironmentVariable("CSVQueryAPI"));
-            con.Open();
-            string sql = $"SELECT * FROM public.\"Employees\" WHERE \"{colA}\")>\"{colB}\";";
-
-            using (NpgsqlCommand command = new(sql, con))
-            {
-
-                using NpgsqlDataReader reader = command.ExecuteReader();
-                while (reader.Read())
-                {
-                    string e = reader.GetValue(0).ToString() + " - " + reader.GetString(1) + " " + reader.GetString(2) + " - " + reader.GetString(3);
-                    Result.Add(e);
-
-                }
-            }
-
-            con.Close();
-            return Result;
-        }
-
 
     }
 }

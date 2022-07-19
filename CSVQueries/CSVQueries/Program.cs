@@ -3,14 +3,14 @@ using CSVQueries.Models;
 using CSVQueries.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+string connectionString = builder.Configuration.GetConnectionString("CSVQueryAPI");
 
 // Add services to the container.
 builder.Services.AddScoped<ICSVQueryService, CSVQueryService>();
 builder.Services.AddControllers();
-//builder.Services.AddDbContext<ModelsContext>(option => option.UseInMemoryDatabase("CSVQueryDB"));
+builder.Services.AddDbContext<ModelsContext>(options => options.UseNpgsql(connectionString));
 
-var ConnectionString = Environment.GetEnvironmentVariable("CSVQueryAPI");
-builder.Services.AddDbContext<ModelsContext>(options => options.UseNpgsql(ConnectionString));
+//builder.Services.AddDbContext<ModelsContext>(option => option.UseInMemoryDatabase("CSVQueryDB"));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

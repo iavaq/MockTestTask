@@ -9,6 +9,7 @@ namespace CSVQueries.Controllers
     public class HomeController : ControllerBase
     {
         private readonly ICSVQueryService _service;
+        private string _query;
 
         public HomeController(ICSVQueryService service)
         {
@@ -20,20 +21,21 @@ namespace CSVQueries.Controllers
         public ActionResult UploadFile(IFormFile file)
         {
             _service.Upload(file);
-
             return NoContent();
         }
 
-        [HttpGet("/SearchByKeyword/{columnName},{word}")]
+       [HttpGet("/SearchByKeyword/{columnName},{word}")]
         public ActionResult<List<string>> SearchByKeyword(string columnName, string word)
         {
-            return _service.KeywordQuery(columnName, word);
+            _query = $"SELECT * FROM public.\"Employees\" WHERE Lower(\"{columnName}\") LIKE Lower('%{word}%');";
+            return _service.QueryDB(_query);
         }
 
         [HttpGet("/SearchExact/{columnName},{word}")]
         public ActionResult<List<string>> SearchExact(string columnName, string word)
         {
-            return _service.ExactQuery(columnName, word);
+            _query = $"SELECT * FROM public.\"Employees\" WHERE Lower(\"{columnName}\")=Lower('{word}');";
+            return _service.QueryDB(_query);
         }
 
         [HttpGet("/RegexSearch/{columnName},{regex}")]
@@ -41,20 +43,23 @@ namespace CSVQueries.Controllers
         {
             //regex = ^\d{3}[^\d]
             //string regex2 = "^[^\d]{1,2}\d{1}(\y|[^\d])";
-            return _service.RegexQuery(columnName, regex);
+
+            _query = $"SELECT * FROM public.\"Employees\" WHERE \"{columnName}\" ~ '{regex}';";
+            return _service.QueryDB(_query);
         }
 
         [HttpGet("/LimitByCharacterLength/{columnName},{minValue}")]
         public ActionResult<List<string>> LimitByCharacterLength(string columnName, int minValue)
         {
-            return _service.CharLength(columnName, minValue);
+            _query = $"SELECT * FROM public.\"Employees\" WHERE length(\"{columnName}\")>{minValue};";
+            return _service.QueryDB(_query);
         }
 
-        [HttpGet("/CompareColumns/{columnA},{columnB}")]
+        [HttpGet("/GreaterColumn/{columnA},{columnB}")]
         public ActionResult<List<string>> CompareColumns(string columnA, string columnB)
         {
-
-            return _service.CompareColumns(columnA, columnB);
+            _query = $"SELECT * FROM public.\"Employees\" WHERE \"{columnA}\">\"{columnB}\";";
+            return _service.QueryDB(_query);
         }
     }
 }
